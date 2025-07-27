@@ -39,7 +39,7 @@ The app is now live on streamlit and you can view it from [here](https://medibot
 ### 1. Clone the Repo
 
 ```bash
-git clone https://github.com/shivkumars005/MediChat-Streamlit
+git clone https://github.com/shivakumarsouta/MediChat-Streamlit
 cd MediChat-Streamlit
 ```
 
