@@ -2,13 +2,13 @@ import os
 from dotenv import load_dotenv
 import streamlit as st
 
-# Load environment variables from .env file
-load_dotenv()
-
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
+
+# Load environment variables from .env file
+load_dotenv()
 
 @st.cache_resource
 def load_vector_db(faiss_db_path):
@@ -28,8 +28,18 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
         
+    # Render past chat messages and their source documents from history
     for message in st.session_state.messages:
-        st.chat_message(message["role"]).markdown(message["content"])
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+            
+            # If the message contains source documents, render the expander
+            if "docs" in message and message["docs"]:
+                with st.expander("Show source documents"):
+                    for i, doc in enumerate(message["docs"], start=1):
+                        source = doc.metadata.get("source", "unknown")
+                        page = doc.metadata.get("page", "unknown")
+                        st.markdown(f"**Document {i}** — Source: `{source}`, Page: `{page}`\n\n> {doc.page_content[:300]}...")
 
     prompt = st.chat_input("Enter your question here:")
 
@@ -68,17 +78,25 @@ def main():
             response = client.invoke(formatted_prompt)
             response_content = response.content
 
-            st.chat_message("assistant").markdown(response_content)
-            st.session_state.messages.append({"role": "assistant", "content": response_content})
+            # Display assistant response and current documents
+            with st.chat_message("assistant"):
+                st.markdown(response_content)
+                with st.expander("Show source documents"):
+                    for i, doc in enumerate(docs, start=1):
+                        source = doc.metadata.get("source", "unknown")
+                        page = doc.metadata.get("page", "unknown")
+                        st.markdown(f"**Document {i}** — Source: `{source}`, Page: `{page}`\n\n> {doc.page_content[:300]}...")
 
-            with st.expander("Show source documents"):
-                for i, doc in enumerate(docs, start=1):
-                    source = doc.metadata.get("source", "unknown")
-                    page = doc.metadata.get("page", "unknown")
-                    st.markdown(f"**Document {i}** — Source: `{source}`, Page: `{page}`\n\n> {doc.page_content[:300]}...")
+            # Save the response content AND the retrieved docs into session state history
+            st.session_state.messages.append({
+                "role": "assistant", 
+                "content": response_content, 
+                "docs": docs
+            })
 
         except Exception as e:
-            st.error(f"An error occurred: {e}")
+            error_message = f"An error occurred: {e}"
+            st.error(error_message)
             st.session_state.messages.append({"role": "assistant", "content": "An error occurred while processing your request."})
 
 if __name__ == "__main__":
