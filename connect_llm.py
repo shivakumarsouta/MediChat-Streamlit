@@ -1,16 +1,16 @@
-import os 
+import os
 
-# Step 1: Setup LLM (Mistral with huggingFace)
 from langchain_core.prompts import PromptTemplate
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from huggingface_hub import InferenceClient
+from langchain_groq import ChatGroq
 
-# Load environment token and repo
-HF_TOKEN = os.environ.get("HF_TOKEN")
-HUGGINGFACE_REPO_ID = "mistralai/Mistral-7B-Instruct-v0.3"
+# Load environment token and set Groq model ID
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+GROQ_MODEL_ID = "llama-3.3-70b-versatile"
 
-client = InferenceClient(model=HUGGINGFACE_REPO_ID, token=HF_TOKEN) 
+# Initialize the Groq Chat client
+client = ChatGroq(model=GROQ_MODEL_ID, temperature=0.1, api_key=GROQ_API_KEY)
 
 # Step 2: Custom Prompt
 CUSTOM_PROMPT_TEMPLATE = """
@@ -24,10 +24,10 @@ Question: {question}
 Start the answer directly. No small talk please.
 """
 
-def set_custom_prompt(CUSTOM_PROMPT_TEMPLATE):
+def set_custom_prompt(custom_prompt_template):
     return PromptTemplate(
         input_variables=["context", "question"],
-        template=CUSTOM_PROMPT_TEMPLATE
+        template=custom_prompt_template
     )
 
 # Step 3: Load the vector database
@@ -43,23 +43,21 @@ def run_custom_chain(user_query: str):
 
     formatted_prompt = CUSTOM_PROMPT_TEMPLATE.format(context=context, question=user_query)
 
-    response = client.chat_completion(messages=[
-        {"role": "user", "content": formatted_prompt}
-    ])
+    # Invoke Groq chat model
+    response = client.invoke(formatted_prompt)
 
     return {
-        "result": response.choices[0].message["content"],
+        "result": response.content,
         "source_documents": docs
     }
 
-# Step 5: Query the custom chain
-user_query = input("Enter your question: ")
+if __name__ == "__main__":
+    user_query = input("Enter your question: ")
+    response = run_custom_chain(user_query)
+    print("Answer:", response['result'])
 
-response = run_custom_chain(user_query)
-print("Answer:", response['result'])
-
-print("\nSource Documents:\n")
-for i, doc in enumerate(response["source_documents"], start=1):
-    source = doc.metadata.get("source", "unknown")
-    page = doc.metadata.get("page", "unknown")
-    print(f"Document {i} — Source: {source}, Page: {page}\nContent: {doc.page_content[:300]}...\n")
+    print("\nSource Documents:\n")
+    for i, doc in enumerate(response["source_documents"], start=1):
+        source = doc.metadata.get("source", "unknown")
+        page = doc.metadata.get("page", "unknown")
+        print(f"Document {i} — Source: {source}, Page: {page}\nContent: {doc.page_content[:300]}...\n")

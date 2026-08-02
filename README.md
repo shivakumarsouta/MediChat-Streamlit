@@ -1,108 +1,219 @@
-# MediBot: Medical Question Answering ChatBot
+# 🩺 MediBot: RAG Based Medical Question Answering Chatbot
 
-MediBot is an intelligent chatbot built with **LangChain**, **Hugging Face Inference API**, **FAISS**, and **Streamlit** to answer medical questions based on a custom PDF knowledge base (e.g. `GALE_ENCYCLOPEDIA---.pdf`). It retrieves the most relevant context from your documents and answers accurately using the **Mistral-7B-Instruct-v0.3** model.
-
----
-
-## LIVE
-The app is now live on streamlit and you can view it from [here](https://medibot-by-sks.streamlit.app/)
-
-## 🚀 Features
-
-* RAG pipeline using FAISS for semantic search
-* Uses `sentence-transformers/all-MiniLM-L6-v2` for embedding
-* Runs **Mistral 7B** via Hugging Face Inference API (`conversational` task)
-* Streamlit chat UI with conversation memory
-* Shows top source documents with page and preview content
+MediBot is an intelligent **Retrieval Augmented Generation (RAG)** powered medical chatbot that answers medical questions using a custom PDF knowledge base. Built with **Streamlit**, **LangChain**, **FAISS**, and the **Groq API**, it retrieves the most relevant medical information from indexed documents and generates accurate, context aware responses using high performance open source LLMs.
 
 ---
 
-## 📁 Project Structure
+## 🌐 Live Demo
 
-```
-├── medibotUI.py                  #Streamlitapp
-├── connect_llm.py                # CLI version
-├── create_memory.py              # CLI version
-├── vector_db/faiss_db            # Vector index
-    ├──index.faiss
-    ├──index.pkl  
-├── data/GALE_ENCYCLOPEDIA.pdf    # Source PDF
+🚀 **Try the application here:**
+https://medibot-by-sks.streamlit.app/
+
+---
+
+## ✨ Features
+
+* 📚 RAG pipeline powered by **FAISS** for semantic document retrieval
+* 🧠 Local embeddings using `sentence-transformers/all-MiniLM-L6-v2`
+* ⚡ High speed inference through the **Groq API**
+* 💬 Interactive Streamlit chat interface
+* 📝 Conversation memory for contextual responses
+* 📄 Displays retrieved source documents with page numbers and content previews
+* 🔍 Accurate retrieval from a custom medical PDF knowledge base
+
+---
+
+## 📂 Project Structure
+
+```text
+MediChat-Streamlit/
+│
+├── app.py                  # Streamlit application
+├── connect_llm.py                # LLM connection script
+├── create_memory.py              # Builds the FAISS vector database
+│
+├── vector_db/
+│   └── faiss_db/
+│       ├── index.faiss
+│       └── index.pkl
+│
+├── data/
+│   └── GALE_ENCYCLOPEDIA.pdf      # Medical knowledge base
+│
+├── .env                          # Environment variables
 ├── requirements.txt              # Python dependencies
-└── README.md                     # This file
-├──LICENSE                        # License
+├── README.md
+└── LICENSE
 ```
 
 ---
 
-## ⚙️ Setup Instructions
+## 🚀 Getting Started
 
-### 1. Clone the Repo
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/shivkumars005/MediChat-Streamlit
+git clone https://github.com/shivakumarsouta/MediChat-Streamlit.git
 cd MediChat-Streamlit
 ```
 
-### 2. Install Dependencies
+### 2. Create a Virtual Environment (Recommended)
+
+**Windows**
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+**Linux / macOS**
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Export Hugging Face API Token
+### 4. Configure Environment Variables
 
-```bash
-export HF_TOKEN=your_huggingface_token  # or set in .env
+Create a `.env` file in the project root and add your Groq API key.
+
+```env
+GROQ_API_KEY=your_groq_api_key
 ```
 
-### 4. Build Vector Index (one-time)
+You can obtain an API key from:
 
-Use this script to create `vector_db/faiss_db` from PDF(s).
+https://console.groq.com/
 
-### 5. Run the App
+### 5. Build the Vector Database
+
+Run the following command once to generate the FAISS index from the PDF knowledge base.
 
 ```bash
-streamlit run medibot_UI.py
+python create_memory.py
 ```
+
+### 6. Launch the Application
+
+```bash
+streamlit run app.py
+```
+
+The application will open automatically in your browser.
 
 ---
 
 ## 🧠 How It Works
 
-1. User enters a question in Streamlit.
-2. FAISS finds top-k relevant document chunks from the PDF.
-3. Prompt is constructed with retrieved context.
-4. Mistral LLM via Hugging Face chat API responds.
-5. Response + sources are shown in UI.
+1. The user submits a medical question through the Streamlit interface.
+2. The question is converted into embeddings.
+3. FAISS retrieves the most relevant document chunks from the indexed PDF.
+4. Retrieved context is combined with the user's question.
+5. The prompt is sent to a Groq hosted LLM.
+6. The generated answer and supporting document references are displayed.
 
 ---
 
-## 📚 Requirements
+## 🛠️ Tech Stack
 
-* Python 
+* Python
 * Streamlit
 * LangChain
-* HuggingFace Hub
 * FAISS
+* Hugging Face Sentence Transformers
+* Groq API
+* python-dotenv
 
 ---
 
-## ✅ Credits
+## 📦 Requirements
 
-* [LangChain](https://github.com/langchain-ai/langchain)
-* [Mistral-7B-Instruct](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3)
-* [Streamlit](https://streamlit.io)
+Install all dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
+
+Key libraries include:
+
+* streamlit
+* langchain
+* langchain-community
+* langchain-groq
+* faiss-cpu
+* sentence-transformers
+* python-dotenv
 
 ---
 
-## 🔒 License
+## 📸 Application Workflow
 
-MIT License
+```text
+User Question
+      │
+      ▼
+Generate Embeddings
+      │
+      ▼
+Search FAISS Vector Database
+      │
+      ▼
+Retrieve Relevant Context
+      │
+      ▼
+Groq LLM
+      │
+      ▼
+Medical Response + Source References
+```
 
 ---
 
-## 📞 Collaboration
+## 🤝 Contributing
 
-* [LinkedIn](https://linkedin.com/in/shivakumarsouta)
-* [Portfolio](https://shivakumarsouta-portfolio.vercel.app/)
-* [EMail](mailto:shivakumarsouta18@gmail.com)
+Contributions are welcome.
+
+1. Fork the repository.
+2. Create a new feature branch.
+3. Commit your changes.
+4. Push the branch.
+5. Open a Pull Request.
+
+---
+
+## 🙏 Acknowledgements
+
+* LangChain
+* Streamlit
+* Groq
+* Hugging Face
+* FAISS by Meta AI
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
+
+See the `LICENSE` file for more information.
+
+---
+
+## 👨‍💻 Author
+
+**Shiva Kumar Souta**
+
+* GitHub: https://github.com/shivakumarsouta
+* LinkedIn: https://linkedin.com/in/shivakumarsouta
+* Portfolio: https://shivakumarsouta-portfolio.vercel.app/
+* Email: [shivakumarsouta18@gmail.com](mailto:shivakumarsouta18@gmail.com)
+
+---
+
+⭐ If you found this project helpful, consider giving it a **star** on GitHub.

@@ -1,5 +1,5 @@
 from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
@@ -13,19 +13,15 @@ def load_pdf_data(file_path):
     return documents
 
 documents = load_pdf_data(DATAPATH)
-#print("Length of documents:", len(documents))
-
 
 # Step 2: Create chunks from text
 def create_chunks(extracted_data):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,
-                                                   chunk_overlap=50,)
+                                                   chunk_overlap=50)
     chunks = text_splitter.split_documents(extracted_data)
     return chunks
 
 chunks = create_chunks(documents)
-#print("Number of chunks created:", len(chunks))
-
 
 # Step 3: Create vector embeddings for each chunk
 def get_embedding_model():
@@ -38,4 +34,4 @@ embeddings = get_embedding_model()
 FAISS_DB_PATH = "vector_db/faiss_db"
 db = FAISS.from_documents(chunks, embeddings)
 db.save_local(FAISS_DB_PATH)
-
+print("Vector database created and saved successfully!")
